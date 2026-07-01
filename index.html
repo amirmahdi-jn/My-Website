@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>استاد حافظه</title>
+<style>
+  :root {
+    --primary: #00f2fe;
+    --secondary: #4facfe;
+    --accent: #f093fb;
+    --success: #00ff88;
+    --gold: #ffd700;
+    --bg: #0a0b1e;
+    --text: #ffffff;
+    --heart: #ff3366;
+    --purple: #b980f0;
+    --green-light: #2ecc71;
+    --red-light: #e74c3c;
+    --dark-green: #2e7d32;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    color: var(--text);
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    transform: rotate(0deg);
+  }
+
+  @media (orientation: landscape) {
+    .game-container, .main-menu {
+      max-width: 480px;
+      margin: auto;
+      transform: scale(0.95);
+    }
+    .board {
+      max-width: 100%;
+    }
+  }
+
+  #loadingScreen {
+    position: fixed;
+    inset: 0;
+    background: #0a0b1e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease;
+  }
+  #loadingScreen.fade-out { opacity: 0; pointer-events: none; }
+  #loadingTitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #loadingTitle svg {
+    width: 32px;
+    height: 32px;
+  }
+  #loadingBarContainer {
+    width: 85vw;
+    max-width: 400px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
+  #loadingBar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 3px;
+    transition: width 0.3s ease-out;
+  }
+  #loadingText {
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .main-menu {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border-radius: 32px;
+    padding: 25px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+  }
+  .menu-title {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold), var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+  }
+  .menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px;
+    border-radius: 60px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .menu-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.2);}
+  .menu-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+  .game-container {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    display: none;
+    flex-direction: column;
+    margin: auto;
+  }
+  .game-container.active { display: flex; }
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    background: linear-gradient(to right, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+  }
+  .subtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 9px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .top-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.3);
+    padding: 8px 20px;
+    border-radius: 60px;
+    margin-bottom: 12px;
+  }
+  .stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .inventory-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  .inv-btn {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,215,0,0.3);
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .inv-btn:active { transform: scale(0.96); background: rgba(255,215,0,0.2); }
+  .inv-btn.disabled { opacity: 0.4; }
+  .difficulty-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .diff-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .diff-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+  }
+  .board {
+    display: grid;
+    gap: 8px;
+    margin: 0 auto;
+    width: 100%;
+    justify-content: center;
+  }
+  .card {
+    aspect-ratio: 1 / 1;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+  }
+  .card.flipped {
+    transform: rotateY(180deg);
+  }
+  .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+  }
+  .card-back {
+    background: linear-gradient(145deg, #1e2a44, #0f172a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .card-back::after {
+    content: '?';
+    color: rgba(255,255,255,0.2);
+    font-weight: bold;
+  }
+  .card-front {
+    background: #ffffff;
+    transform: rotateY(180deg);
+  }
+  .card.matched .card-front {
+    background: var(--success);
+    box-shadow: 0 0 12px var(--success);
+  }
+  .win-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 11, 30, 0.95);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    z-index: 100;
+    padding: 20px;
+  }
+  .win-overlay.show { display: flex; }
+  .rank-emoji { font-size: 45px; margin-bottom: 10px; }
+  .win-info {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .flex-btns {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-replay { background: var(--gold); color: #000; }
+  .btn-new { background: var(--secondary); color: black; }
+  .reward-message {
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    width: 100%;
+  }
+  .back-menu-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    padding: 6px;
+    border-radius: 30px;
+    font-size: 12px;
+    margin-top: 12px;
+    color: white;
+    cursor: pointer;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-content {
+    background: #1b2735;
+    border-radius: 28px;
+    padding: 22px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.2);
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 14px;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+    display: inline-block;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .modal-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ddd;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    white-space: normal;
+  }
+  .shop-section {
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 15px;
+  }
+  .shop-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    white-space: normal;
+  }
+  .shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    margin: 12px 0;
+    padding: 12px;
+    border-radius: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .shop-item-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: right;
+    flex-wrap: wrap;
+  }
+  .shop-item-info span { font-weight: bold; font-size: 13px; }
+  .shop-item-price {
+    color: var(--dark-green);
+    font-weight: bold;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .shop-buy-coin {
+    background: var(--gold);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 40px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .close-modal {
+    margin-top: 15px;
+    background: #4facfe;
+    padding: 10px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .modal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: right;
+  }
+  .modal-item svg { width: 20px; height: 20px; fill: var(--accent); }
+  .modal-item-text { display: flex; flex-direction: column; text-align: right; }
+  .modal-item-label { font-size: 9px; color: rgba(255, 255, 255, 0.5); }
+  .modal-item-value { font-size: 13px; font-weight: bold; color: var(--text); }
+  
+  .modal-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 5px;
+  }
+  .modal-buttons.center { justify-content: center; }
+  .modal-buttons.horizontal {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border-radius: 40px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    text-align: center;
+    min-width: 0;
+  }
+  .modal-btn.confirm { background: var(--green-light); color: white; }
+  .modal-btn.cancel { background: var(--red-light); color: white; }
+  .modal-btn.shop { background: var(--gold); color: black; }
+  .modal-btn.pay { background: #00aaff; color: white; }
+
+  .purchase-notification {
+    position: fixed;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%) translateY(30px);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    padding: 12px 24px;
+    border-radius: 45px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 3000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .purchase-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .purchase-notification svg { width: 20px; height: 20px; }
+
+  .token-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0 6px;
+  }
+  .token-input {
+    background: #0a0b1e;
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    width: 140px;
+    text-align: center;
+    letter-spacing: 2px;
+    font-family: monospace;
+    direction: ltr;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .token-input:focus {
+    border-color: var(--gold);
+  }
+  .token-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .token-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+  }
+  .token-btn:active { transform: scale(0.9); }
+  .token-btn.check {
+    background: #2ecc71;
+    color: white;
+  }
+  .token-btn.cross {
+    background: #e74c3c;
+    color: white;
+  }
+  .token-status {
+    font-size: 13px;
+    font-weight: bold;
+    margin: 4px 0 10px;
+    min-height: 20px;
+  }
+  .token-status.success { color: #2ecc71; }
+  .token-status.error { color: #e74c3c; }
+  .payment-note {
+    font-size: 11px;
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .card-number-box {
+    background: #0a0b1e;
+    padding: 14px;
+    border-radius: 12px;
+    margin: 10px 0;
+    border: 2px solid #ffd700;
+    direction: ltr;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffd700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Network error overlay */
+  #networkErrorOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+  }
+  #networkErrorOverlay.show { display: flex; }
+  .network-error-card {
+    background: #1b2735;
+    border-radius: 28px;
+    padding: 30px 24px;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
+  .network-error-card svg {
+    width: 64px;
+    height: 64px;
+    fill: none;
+    stroke: #ff6b6b;
+    stroke-width: 2;
+    margin-bottom: 12px;
+  }
+  .network-error-card h2 {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .network-error-card p {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .network-retry-btn {
+    background: #4facfe;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 60px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+  }
+  .network-retry-btn:active { transform: scale(0.96); background: #3b8cd9; }
+</style>
+</head>
+<body>
+
+<div id="loadingScreen">
+  <div id="loadingTitle">استاد حافظه<svg viewBox="0 0 24 24" style="width: 32px; height: 32px; fill: var(--gold);"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg></div>
+  <div id="loadingBarContainer"><div id="loadingBar"></div></div>
+  <div id="loadingText">بارگذاری... 0%</div>
+</div>
+
+<!-- Network Error Overlay -->
+<div id="networkErrorOverlay">
+  <div class="network-error-card">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+      <path d="M12 8v4" />
+      <circle cx="12" cy="16" r="1" fill="#ff6b6b" stroke="none" />
+    </svg>
+    <h2>No Connection</h2>
+    <p>.Please Check Your Internet Connection</p>
+    <button class="network-retry-btn" id="networkRetryBtn">Retry</button>
+  </div>
+</div>
+
+<div class="main-menu" id="mainMenu" style="display: none;">
+  <div class="menu-title">استاد حافظه</div>
+  <div class="menu-buttons">
+    <div class="menu-btn" id="startGameBtn"><svg viewBox="0 0 24 24" fill="white"><path d="M9 5v14l11-7z"/></svg>شروع بازی</div>
+    <div class="menu-btn" id="shopMenuBtn"><svg viewBox="0 0 24 24" fill="white"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>فروشگاه</div>
+    <div class="menu-btn" id="infoMenuBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.3" fill="white"/><g transform="rotate(180 12 12)"><line x1="12" y1="5" x2="12" y2="13.5" stroke="black" stroke-width="2"/><circle cx="12" cy="17.5" r="1.3" fill="black"/></g></svg>اطلاعات</div>
+  </div>
+</div>
+
+<div class="game-container" id="gameContainer">
+  <h1>استاد حافظه</h1>
+  <div class="subtitle">ذهن خود را به چالش بکشید!</div>
+  <div class="difficulty-bar">
+    <button class="diff-btn active" data-size="4">4×4</button>
+    <button class="diff-btn" data-size="6">6×6</button>
+  </div>
+  <div class="top-stats">
+    <div class="stat-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#ffd700" stroke="#b8860b" stroke-width="1.5"/><text x="12" y="17" font-size="12" text-anchor="middle" fill="#8B4513" font-weight="bold" stroke="none">$</text></svg><span id="gameCoins">50</span></div>
+    <div class="stat-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span id="timerDisplay">35</span><span style="font-size:12px;">ثانیه</span></div>
+    <div class="stat-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="#ff3366"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span id="gameHearts">3</span></div>
+  </div>
+  <div class="board" id="board"></div>
+  <div class="inventory-buttons">
+    <div class="inv-btn" id="useTimeBoostBtn">⏱️ <span id="timeBoostCount">0</span> زمان اضافه</div>
+    <div class="inv-btn" id="useHeartBoostBtn">❤️ <span id="heartBoostCount">0</span> قلب اضافه</div>
+  </div>
+  <button class="back-menu-btn" id="backToMenuBtn">بازگشت به منو</button>
+  <div class="win-overlay" id="winOverlay">
+    <div class="rank-emoji" id="rankEmoji">🏆</div>
+    <h2 id="rankTitle">پیروزی!</h2>
+    <div class="win-info">حرکات: <span id="finalMoves">0</span><br>زمان: <span id="finalTime">0</span> ثانیه</div>
+    <div class="flex-btns"><button class="btn btn-replay" id="replayBtn">بازی مجدد</button><button class="btn btn-new" id="newGameBtn">بازی جدید</button></div>
+    <div id="rewardMessage" class="reward-message"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="shopModal">
+  <div class="modal-content">
+    <div class="modal-title" style="color: #1e90ff; font-size: 22px;">🛒 فروشگاه</div>
+    
+    <div class="shop-section">
+      <div class="section-title" style="color: #b980f0;">🎁 خرید آیتم</div>
+      <div class="shop-item">
+        <div class="shop-item-info">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+          <span>زمان اضافه (+۵ ثانیه)</span>
+        </div>
+        <div>
+          <span class="shop-item-price" style="color: #2ecc71;">۱۰ سکه</span>
+          <button class="shop-buy-coin" data-item="time_boost">خرید</button>
+        </div>
+      </div>
+      <div class="shop-item">
+        <div class="shop-item-info">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#ff3366">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <span>قلب اضافه (۱ عدد)</span>
+        </div>
+        <div>
+          <span class="shop-item-price" style="color: #2ecc71;">۵ سکه</span>
+          <button class="shop-buy-coin" data-item="heart_boost">خرید</button>
+        </div>
+      </div>
+    </div>
+    
+    <button class="close-modal" id="closeShopBtn">بستن</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal-content">
+    <div class="modal-title" style="color: #00f2fe; font-size: 20px;">💳 پرداخت</div>
+    
+    <div class="payment-note">
+      📌 مبلغ مورد نظر را به شماره کارت زیر واریز کنید.<br>
+      📎 فیش واریزی را به آیدی AmirMahdi_2023@ در تلگرام ارسال کنید.
+    </div>
+    
+    <div class="card-number-box">6037 9982 5196 2329</div>
+    
+    <div style="font-size: 10px; font-weight: bold; color: #ddd; margin: 8px 0 4px;">
+      🏷 لطفا کد توکن داده شده از سوی مدیریت را در کادر زیر وارد کنید.
+    </div>
+    
+    <div class="token-input-row">
+      <input type="text" class="token-input" id="tokenInput" maxlength="6" placeholder="مثلاً : ۱۲۳۴۵۶" inputmode="numeric" />
+      <div class="token-actions">
+        <button class="token-btn check" id="tokenCheckBtn" title="تأیید">✔</button>
+        <button class="token-btn cross" id="tokenCrossBtn" title="لغو">✘</button>
+      </div>
+    </div>
+    <div id="tokenStatus" class="token-status"></div>
+    
+    <button class="close-modal" id="closePaymentBtn" style="background: #4facfe; margin-top: 4px;">بستن</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="infoModal">
+  <div class="modal-content">
+    <div class="modal-title">ℹ️ اطلاعات</div>
+    <div class="modal-item"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><div class="modal-item-text"><span class="modal-item-label">توسعه دهنده :</span><span class="modal-item-value">AmirMahdi.JN</span></div></div>
+    <div class="modal-item"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg><div class="modal-item-text"><span class="modal-item-label">اینستاگرام :</span><span class="modal-item-value">_AmirMahdi.JN_@</span></div></div>
+    <div class="modal-item"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg><div class="modal-item-text"><span class="modal-item-label">موبایل :</span><span class="modal-item-value">09918659151</span></div></div>
+    <button class="close-modal" id="closeInfoBtn">بستن</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="difficultyConfirmModal"><div class="modal-content"><div class="modal-title">🔄 تغییر سطح کارت</div><div class="modal-text">آیا می‌خواهید سطح کارت را تغییر دهید؟<br>در صورت تغییر، ۱ قلب و ۵ سکه کسر می‌شود.</div><div class="modal-buttons"><button class="modal-btn confirm" id="difficultyConfirmYes">بله</button><button class="modal-btn cancel" id="difficultyConfirmNo">انصراف</button></div></div></div>
+<div class="modal-overlay" id="exitConfirmModal"><div class="modal-content"><div class="modal-title">↩️ بازگشت به منو</div><div class="modal-text">آیا می‌خواهید به منو بازگردید؟<br>در صورت بازگشت، ۱ قلب و ۵ سکه کسر می‌شود.</div><div class="modal-buttons"><button class="modal-btn confirm" id="exitConfirmYes">بله</button><button class="modal-btn cancel" id="exitConfirmNo">انصراف</button></div></div></div>
+
+<div class="modal-overlay" id="timeoutModal">
+  <div class="modal-content">
+    <div class="modal-title">⏰ زمان تمام شد!</div>
+    <div class="modal-text" style="margin-bottom: 10px;">برای ادامه یکی از گزینه های زیر را انتخاب کنید:</div>
+    <div class="modal-buttons horizontal" style="display: flex; gap: 8px; justify-content: center;">
+      <button class="modal-btn confirm" id="timeoutContinueBtn" style="background: #2ecc71; color: white;">ادامه با ۵ سکه</button>
+      <button class="modal-btn" id="timeoutUseBoostBtn" style="background: #6c757d; color: white; font-size: 9px; padding: 8px 4px;">استفاده از زمان اضافه</button>
+      <button class="modal-btn cancel" id="timeoutShopBtn" style="background: #e74c3c; color: white;">رفتن به فروشگاه</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmPurchaseModal"><div class="modal-content"><div class="modal-title">تأیید خرید</div><div class="modal-text" id="purchaseModalText"></div><div class="modal-buttons"><button class="modal-btn confirm" id="confirmPurchaseYes">بله</button><button class="modal-btn cancel" id="confirmPurchaseNo">خیر</button></div></div></div>
+<div class="modal-overlay" id="insufficientModal"><div class="modal-content"><div class="modal-title">⚠️ منابع کافی نیست!</div><div class="modal-text">برای این کار به ۱ قلب و ۵ سکه نیاز دارید.<br>آیا می‌خواهید به فروشگاه بروید؟</div><div class="modal-buttons"><button class="modal-btn confirm" id="insufficientGoShop">رفتن به فروشگاه</button><button class="modal-btn cancel" id="insufficientCancel">بازگشت به بازی</button></div></div></div>
+<div class="modal-overlay" id="insufficientCoinsModal"><div class="modal-content"><div class="modal-title">⚠️ سکه کافی نیست!</div><div class="modal-text">برای ادامه به ۵ سکه نیاز دارید.<br>آیا می‌خواهید به فروشگاه بروید؟</div><div class="modal-buttons"><button class="modal-btn confirm" id="insufficientCoinsGoShop">رفتن به فروشگاه</button><button class="modal-btn cancel" id="insufficientCoinsCancel">بازگشت</button></div></div></div>
+
+<div id="purchaseNotification" class="purchase-notification"><span id="notificationIcon"></span><span id="notificationText"></span></div>
+
+<script>
+(function(){
+  // ---------- توکن‌ها ----------
+  const TOKENS = {
+    gold_100: [
+      '123456', '234567', '345678', '456789', '567890',
+      '678901', '789012', '890123', '901234', '102345'
+    ],
+    gold_200: [
+      '111222', '222333', '333444', '444555', '555666',
+      '666777', '777888', '888999', '999000', '001122'
+    ],
+    gold_300: [
+      '112233', '223344', '334455', '445566', '556677',
+      '667788', '778899', '889900', '990011', '001234'
+    ]
+  };
+
+  function isTokenUsed(token) {
+    const used = JSON.parse(localStorage.getItem('used_tokens') || '[]');
+    return used.includes(token);
+  }
+
+  function markTokenUsed(token) {
+    const used = JSON.parse(localStorage.getItem('used_tokens') || '[]');
+    if (!used.includes(token)) {
+      used.push(token);
+      localStorage.setItem('used_tokens', JSON.stringify(used));
+    }
+  }
+
+  function validateToken(token, type) {
+    if (!token || token.length !== 6 || !/^\d{6}$/.test(token)) {
+      return { valid: false, message: 'کد باید ۶ رقم باشد.' };
+    }
+    if (isTokenUsed(token)) {
+      return { valid: false, message: 'این کد قبلاً استفاده شده است.' };
+    }
+    const validTokens = TOKENS[type] || [];
+    if (!validTokens.includes(token)) {
+      return { valid: false, message: 'کد نامعتبر است.' };
+    }
+    return { valid: true, message: 'کد معتبر است.' };
+  }
+
+  // ---------- مقداردهی اولیه در صورت نبود کلید ----------
+  if (!localStorage.getItem('golden_coins')) {
+    localStorage.setItem('golden_coins', '50');
+    localStorage.setItem('golden_hearts', '3');
+    localStorage.setItem('firstGamePlayed', 'false');
+    localStorage.setItem('inv_time', '0');
+    localStorage.setItem('inv_heart', '0');
+  }
+
+  // ---------- بارگذاری داده‌ها ----------
+  let coins = 0, hearts = 0, firstGamePlayed = false;
+  let inventory = { timeBoosts: 0, heartBoosts: 0 };
+
+  function loadData(){
+    coins = parseInt(localStorage.getItem('golden_coins')) || 50;
+    hearts = parseInt(localStorage.getItem('golden_hearts')) || 3;
+    firstGamePlayed = localStorage.getItem('firstGamePlayed') === 'true';
+    inventory.timeBoosts = parseInt(localStorage.getItem('inv_time')) || 0;
+    inventory.heartBoosts = parseInt(localStorage.getItem('inv_heart')) || 0;
+  }
+  loadData();
+
+  // ---------- متغیرهای بازی ----------
+  let size = 4, totalPairs = 8, cards = [], flipped = [], moves = 0, matched = 0;
+  let timer = null, timeLeft = 35, active = false, locked = false, modalOpen = false;
+  let currentMaxTime = 35;
+  let isTimeOutMode = false;
+  let currentEmojiSet = [];
+  let gameContainer = document.getElementById('gameContainer');
+  let mainMenu = document.getElementById('mainMenu');
+  let boardDiv = document.getElementById('board');
+  let winOverlay = document.getElementById('winOverlay');
+
+  // ---------- مجموعه‌های ایموجی ----------
+  const EMOJI_FACES = ['😃','😍','😁','😎','😇','🥲','😴','☹️','☺️','😝'];
+  const EMOJI_ANIMALS = ['🐕','🐈','🐁','🐘','🐏','🐪','🦓','🐄','🐖','🐇'];
+  const EMOJI_INSECTS = ['🐝','🦋','🐞','🐜','🪰','🪳','🦂','🐛','🐌','🦗'];
+  const EMOJI_FRUITS = ['🍎','🍐','🍊','🍋','🍉','🍇','🍓','🍍','🍒','🥕'];
+  const EMOJI_VEHICLES = ['🚗','🚕','✈️','🛳','🚲','🚃','🚁','🚂','🏍️','🦽'];
+  const EMOJI_OBJECTS = ['⌚','📱','💻','📺','🎤','📷','🔑','🎓','🎧','📻'];
+  const EMOJI_FLAGS = ['🇮🇷','🇹🇷','🇪🇸','🇩🇪','🇫🇷','🇮🇹','🇦🇷','🇧🇷','🇷🇺','🇨🇳'];
+  const EMOJI_FREE = ['⭐','❤️','🔥','🎀','💎','🎈','🧸','🏛','🎮','🪁','⚽','🏀','🏈','🎸','🎄','👑','☀️','🌙','🌍','🎃','🍔','🍟','🍕','🥤','🍦','👕','👖','🧤','🧦','👟'];
+  const FULL_EMOJI_SET = [...EMOJI_FACES, ...EMOJI_ANIMALS, ...EMOJI_INSECTS, ...EMOJI_FRUITS, ...EMOJI_VEHICLES, ...EMOJI_OBJECTS, ...EMOJI_FLAGS, ...EMOJI_FREE];
+
+  function getRandomEmojis(count) {
+    let shuffled = [...FULL_EMOJI_SET];
+    for(let i = shuffled.length - 1; i > 0; i--){
+      let j = Math.floor(Math.random() * (i+1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, count);
+  }
+
+  // ---------- توابع اصلی بازی ----------
+  function createDeckFromSet(emojiSet, pairCount) {
+    let pool = emojiSet.slice(0, pairCount);
+    let deck = [...pool, ...pool];
+    for(let i = deck.length - 1; i > 0; i--){
+      let j = Math.floor(Math.random() * (i+1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    for(let i = 0; i < deck.length - 1; i++){
+      if(deck[i] === deck[i+1]){
+        let swapIndex = (i+2) % deck.length;
+        [deck[i+1], deck[swapIndex]] = [deck[swapIndex], deck[i+1]];
+      }
+    }
+    return deck.map((emoji, idx) => ({ id: idx, emoji: emoji, flipped: false, matched: false }));
+  }
+
+  function renderBoard(){
+    boardDiv.innerHTML = '';
+    boardDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    cards.forEach((c, idx) => {
+      const div = document.createElement('div'); 
+      div.className = 'card' + (c.flipped ? ' flipped' : '') + (c.matched ? ' matched' : '');
+      div.innerHTML = `<div class="card-back"></div><div class="card-front">${c.emoji}</div>`;
+      div.onclick = () => flipCard(idx);
+      boardDiv.appendChild(div);
+    });
+  }
+  
+  function flipCard(idx){
+    if(!active || locked || cards[idx].flipped || cards[idx].matched) return;
+    cards[idx].flipped = true;
+    flipped.push(idx);
+    const cardDivs = document.querySelectorAll('.card');
+    if(cardDivs[idx]) cardDivs[idx].classList.add('flipped');
+    if(flipped.length === 2){
+      moves++;
+      checkMatch();
+    }
+    saveGameState();
+  }
+  
+  function checkMatch(){
+    locked = true;
+    const [i1, i2] = flipped;
+    if(cards[i1].emoji === cards[i2].emoji){
+      setTimeout(() => {
+        cards[i1].matched = true; cards[i2].matched = true;
+        matched++;
+        const cardsDiv = document.querySelectorAll('.card');
+        if(cardsDiv[i1]) cardsDiv[i1].classList.add('matched');
+        if(cardsDiv[i2]) cardsDiv[i2].classList.add('matched');
+        flipped = [];
+        locked = false;
+        if(matched === totalPairs && active) endGameWin();
+        saveGameState();
+      }, 350);
+    } else {
+      setTimeout(() => {
+        cards[i1].flipped = false; cards[i2].flipped = false;
+        const cardsDiv = document.querySelectorAll('.card');
+        if(cardsDiv[i1]) cardsDiv[i1].classList.remove('flipped');
+        if(cardsDiv[i2]) cardsDiv[i2].classList.remove('flipped');
+        flipped = [];
+        locked = false;
+        saveGameState();
+      }, 750);
+    }
+  }
+  
+  function endGameWin(){
+    clearInterval(timer); timer = null;
+    active = false;
+    let reward = (moves <= totalPairs * 2) ? 30 : (moves <= totalPairs * 2 + 4) ? 20 : 10;
+    coins += reward;
+    if(!firstGamePlayed){
+      firstGamePlayed = true;
+      localStorage.setItem('firstGamePlayed', 'true');
+    }
+    save();
+    const rankEmoji = document.getElementById('rankEmoji');
+    const rankTitle = document.getElementById('rankTitle');
+    const finalMoves = document.getElementById('finalMoves');
+    const finalTime = document.getElementById('finalTime');
+    const rewardMsg = document.getElementById('rewardMessage');
+    if(rankEmoji) rankEmoji.innerHTML = reward >= 30 ? "🥇" : (reward >= 20 ? "🥈" : "🥉");
+    if(rankTitle) rankTitle.innerText = reward >= 30 ? "عالی" : (reward >= 20 ? "آفرین" : "خوب");
+    if(finalMoves) finalMoves.innerText = moves;
+    if(finalTime) finalTime.innerText = currentMaxTime - timeLeft;
+    if(rewardMsg) rewardMsg.innerHTML = `🎉 ${reward} سکه دریافت کردی! 🎉`;
+    winOverlay.classList.add('show');
+    saveGameState();
+  }
+  
+  function startGame(gridSize, useExistingSet = false, newSetIfTrue = false) {
+    size = gridSize;
+    totalPairs = (size * size) / 2;
+    matched = 0; moves = 0; flipped = [];
+    currentMaxTime = (size === 4) ? 35 : 55;
+    timeLeft = currentMaxTime;
+    active = true; locked = false; modalOpen = false;
+    isTimeOutMode = false;
+    if(timer) clearInterval(timer);
+    if(newSetIfTrue || currentEmojiSet.length === 0 || !useExistingSet){
+      currentEmojiSet = getRandomEmojis(totalPairs);
+    }
+    cards = createDeckFromSet(currentEmojiSet, totalPairs);
+    renderBoard();
+    updateGameUI();
+    timer = setInterval(() => {
+      if(!active || modalOpen) return;
+      if(timeLeft <= 1){
+        if(!firstGamePlayed){
+          timeLeft = 5;
+          updateGameUI();
+          return;
+        } else {
+          clearInterval(timer); timer = null;
+          active = false; locked = true;
+          showTimeoutModal();
+        }
+      } else {
+        timeLeft--;
+        updateGameUI();
+      }
+      saveGameState();
+    }, 1000);
+    winOverlay.classList.remove('show');
+    document.getElementById('rewardMessage').innerHTML = '';
+    updateInventoryDisplay();
+    saveGameState();
+  }
+
+  // ---------- ذخیره و بازیابی وضعیت بازی ----------
+  function saveGameState() {
+    const state = {
+      size, totalPairs, cards, flipped, moves, matched,
+      timeLeft, currentMaxTime, active, locked, modalOpen,
+      isTimeOutMode, currentEmojiSet,
+      winOverlayShown: winOverlay.classList.contains('show')
+    };
+    try {
+      localStorage.setItem('gameState', JSON.stringify(state));
+    } catch(e) {}
+  }
+
+  function loadGameState() {
+    try {
+      const raw = localStorage.getItem('gameState');
+      if (!raw) return false;
+      const state = JSON.parse(raw);
+      size = state.size || 4;
+      totalPairs = state.totalPairs || 8;
+      cards = state.cards || [];
+      flipped = state.flipped || [];
+      moves = state.moves || 0;
+      matched = state.matched || 0;
+      timeLeft = state.timeLeft || 35;
+      currentMaxTime = state.currentMaxTime || 35;
+      active = state.active || false;
+      locked = state.locked || false;
+      modalOpen = state.modalOpen || false;
+      isTimeOutMode = state.isTimeOutMode || false;
+      currentEmojiSet = state.currentEmojiSet || [];
+      if (state.winOverlayShown) {
+        winOverlay.classList.add('show');
+      } else {
+        winOverlay.classList.remove('show');
+      }
+      document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+      const target = document.querySelector(`.diff-btn[data-size="${size}"]`);
+      if(target) target.classList.add('active');
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function restoreGame() {
+    if (loadGameState()) {
+      if (cards.length > 0) {
+        if (winOverlay.classList.contains('show')) {
+          winOverlay.classList.remove('show');
+        }
+        renderBoard();
+        updateGameUI();
+        updateInventoryDisplay();
+        active = true;
+        locked = false;
+        modalOpen = false;
+        isTimeOutMode = false;
+        if (!timer) {
+          timer = setInterval(() => {
+            if (!active || modalOpen) return;
+            if (timeLeft <= 1) {
+              if (!firstGamePlayed) {
+                timeLeft = 5;
+                updateGameUI();
+                return;
+              } else {
+                clearInterval(timer);
+                timer = null;
+                active = false;
+                locked = true;
+                showTimeoutModal();
+              }
+            } else {
+              timeLeft--;
+              updateGameUI();
+            }
+            saveGameState();
+          }, 1000);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ---------- بقیه توابع کمکی ----------
+  function showTimeoutModal(){ pauseGame(); isTimeOutMode = true; document.getElementById('timeoutModal').classList.add('show'); }
+  function continueWithCoins(){
+    if(coins >= 5){
+      coins -= 5; save(); timeLeft = 5;
+      active = true; locked = false; modalOpen = false; isTimeOutMode = false;
+      updateGameUI();
+      if(timer) clearInterval(timer);
+      timer = setInterval(() => {
+        if(!active || modalOpen) return;
+        if(timeLeft <= 1){
+          if(!firstGamePlayed){ timeLeft = 5; updateGameUI(); return; }
+          else { clearInterval(timer); timer = null; active = false; locked = true; showTimeoutModal(); }
+        } else { timeLeft--; updateGameUI(); }
+        saveGameState();
+      }, 1000);
+      document.getElementById('timeoutModal').classList.remove('show');
+      saveGameState();
+    } else {
+      pauseGame();
+      const insModal = document.getElementById('insufficientCoinsModal');
+      insModal.classList.add('show');
+      const goShop = document.getElementById('insufficientCoinsGoShop');
+      const cancel = document.getElementById('insufficientCoinsCancel');
+      const closeModal = () => {
+        insModal.classList.remove('show');
+        goShop.removeEventListener('click', goHandler);
+        cancel.removeEventListener('click', cancelHandler);
+        if(isTimeOutMode && !active) showTimeoutModal();
+        else if(active && !isTimeOutMode) resumeGame();
+      };
+      const goHandler = () => { closeModal(); document.getElementById('shopModal').classList.add('show'); };
+      const cancelHandler = () => { closeModal(); if(isTimeOutMode && !active) showTimeoutModal(); };
+      goShop.addEventListener('click', goHandler);
+      cancel.addEventListener('click', cancelHandler);
+    }
+  }
+  function useTimeBoostFromModal(){
+    if(inventory.timeBoosts > 0){
+      inventory.timeBoosts--; localStorage.setItem('inv_time', inventory.timeBoosts);
+      updateInventoryDisplay(); timeLeft = 5;
+      active = true; locked = false; modalOpen = false; isTimeOutMode = false;
+      updateGameUI();
+      if(timer) clearInterval(timer);
+      timer = setInterval(() => {
+        if(!active || modalOpen) return;
+        if(timeLeft <= 1){
+          if(!firstGamePlayed){ timeLeft = 5; updateGameUI(); return; }
+          else { clearInterval(timer); timer = null; active = false; locked = true; showTimeoutModal(); }
+        } else { timeLeft--; updateGameUI(); }
+        saveGameState();
+      }, 1000);
+      document.getElementById('timeoutModal').classList.remove('show');
+      showToast('از یک زمان اضافه استفاده شد.', true);
+      saveGameState();
+    } else { showToast('زمان اضافه‌ای در انبار ندارید!', false); }
+  }
+  function useTimeBoostManual(){
+    if(!active || isTimeOutMode){ showToast('فقط در حین بازی می‌توانید از زمان اضافه استفاده کنید.', false); return; }
+    if(inventory.timeBoosts > 0){
+      inventory.timeBoosts--; localStorage.setItem('inv_time', inventory.timeBoosts);
+      timeLeft = Math.min(timeLeft + 5, currentMaxTime);
+      updateGameUI(); updateInventoryDisplay();
+      showToast('۵ ثانیه به زمان اضافه شد.', true);
+      saveGameState();
+    } else { showToast('زمان اضافه‌ای در انبار ندارید!', false); }
+  }
+  function useHeartBoostManual(){
+    if(inventory.heartBoosts > 0){
+      inventory.heartBoosts--; localStorage.setItem('inv_heart', inventory.heartBoosts);
+      hearts++; save(); updateGameUI(); updateInventoryDisplay();
+      showToast('یک قلب به موجودی اضافه شد.', true);
+      saveGameState();
+    } else { showToast('قلب اضافه‌ای در انبار ندارید!', false); }
+  }
+  function updateInventoryDisplay(){
+    document.getElementById('timeBoostCount').innerText = inventory.timeBoosts;
+    document.getElementById('heartBoostCount').innerText = inventory.heartBoosts;
+    const timeBtn = document.getElementById('useTimeBoostBtn');
+    const heartBtn = document.getElementById('useHeartBoostBtn');
+    if(inventory.timeBoosts === 0) timeBtn.classList.add('disabled');
+    else timeBtn.classList.remove('disabled');
+    if(inventory.heartBoosts === 0) heartBtn.classList.add('disabled');
+    else heartBtn.classList.remove('disabled');
+  }
+  function save(){
+    localStorage.setItem('golden_coins', coins);
+    localStorage.setItem('golden_hearts', hearts);
+    localStorage.setItem('firstGamePlayed', firstGamePlayed);
+    localStorage.setItem('inv_time', inventory.timeBoosts);
+    localStorage.setItem('inv_heart', inventory.heartBoosts);
+    updateUI();
+    saveGameState();
+  }
+  function updateUI(){
+    document.getElementById('gameCoins').innerText = coins;
+    document.getElementById('gameHearts').innerText = hearts;
+    updateInventoryDisplay();
+  }
+  function updateGameUI(){
+    document.getElementById('timerDisplay').innerText = timeLeft;
+    document.getElementById('gameHearts').innerText = hearts;
+    document.getElementById('gameCoins').innerText = coins;
+    updateInventoryDisplay();
+  }
+  function pauseGame(){ if(timer){ clearInterval(timer); timer = null; } locked = true; modalOpen = true; }
+  function resumeGame(){
+    if(!active) return;
+    if(timer) clearInterval(timer);
+    locked = false; modalOpen = false;
+    timer = setInterval(() => {
+      if(!active || modalOpen) return;
+      if(timeLeft <= 1){
+        if(!firstGamePlayed){ timeLeft = 5; updateGameUI(); return; }
+        else { clearInterval(timer); timer = null; active = false; locked = true; showTimeoutModal(); }
+      } else { timeLeft--; updateGameUI(); }
+      saveGameState();
+    }, 1000);
+  }
+  function applyPenaltyIfNeeded(callback){
+    if(!firstGamePlayed){ callback(); return true; }
+    else if(hearts >= 1 && coins >= 5){ hearts--; coins -= 5; save(); updateUI(); callback(); return true; }
+    else return false;
+  }
+  function showInsufficientModalForAction(){
+    pauseGame();
+    const modal = document.getElementById('insufficientModal');
+    modal.classList.add('show');
+    const goShop = document.getElementById('insufficientGoShop');
+    const cancel = document.getElementById('insufficientCancel');
+    const cleanup = () => { modal.classList.remove('show'); goShop.removeEventListener('click', goHandler); cancel.removeEventListener('click', cancelHandler); if(active && !isTimeOutMode) resumeGame(); };
+    const goHandler = () => { cleanup(); document.getElementById('shopModal').classList.add('show'); };
+    const cancelHandler = () => { cleanup(); };
+    goShop.addEventListener('click', goHandler);
+    cancel.addEventListener('click', cancelHandler);
+  }
+  function changeDifficultyAndRestart(newSize){
+    if(active){ clearInterval(timer); timer = null; active = false; }
+    document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+    const target = document.querySelector(`.diff-btn[data-size="${newSize}"]`);
+    if(target) target.classList.add('active');
+    startGame(newSize, false, true);
+  }
+  const diffBtns = document.querySelectorAll('.diff-btn');
+  diffBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      let newSize = parseInt(btn.dataset.size);
+      let curSize = parseInt(document.querySelector('.diff-btn.active').dataset.size);
+      if(newSize === curSize) return;
+      if(!firstGamePlayed){ changeDifficultyAndRestart(newSize); }
+      else if(active && !isTimeOutMode){
+        if(hearts >= 1 && coins >= 5){ window.pendingDiffChange = newSize; pauseGame(); document.getElementById('difficultyConfirmModal').classList.add('show'); }
+        else showInsufficientModalForAction();
+      } else changeDifficultyAndRestart(newSize);
+    });
+  });
+  document.getElementById('difficultyConfirmYes').onclick = () => {
+    document.getElementById('difficultyConfirmModal').classList.remove('show');
+    if(window.pendingDiffChange){
+      const success = applyPenaltyIfNeeded(() => { changeDifficultyAndRestart(window.pendingDiffChange); window.pendingDiffChange = null; modalOpen = false; isTimeOutMode = false; });
+      if(!success) showInsufficientModalForAction();
+      window.pendingDiffChange = null;
+    } else if(active && !isTimeOutMode) resumeGame();
+  };
+  document.getElementById('difficultyConfirmNo').onclick = () => {
+    document.getElementById('difficultyConfirmModal').classList.remove('show');
+    if(active && !isTimeOutMode) resumeGame();
+    window.pendingDiffChange = null;
+  };
+  function exitToMenu(){
+    if(active){ clearInterval(timer); timer = null; active = false; }
+    gameContainer.classList.remove('active');
+    mainMenu.style.display = 'block';
+    modalOpen = false; isTimeOutMode = false;
+    saveGameState();
+  }
+  const backBtn = document.getElementById('backToMenuBtn');
+  backBtn.onclick = () => {
+    if(!firstGamePlayed) exitToMenu();
+    else if(active && !isTimeOutMode){
+      if(hearts >= 1 && coins >= 5){ pauseGame(); document.getElementById('exitConfirmModal').classList.add('show'); }
+      else showInsufficientModalForAction();
+    } else exitToMenu();
+  };
+  document.getElementById('exitConfirmYes').onclick = () => {
+    document.getElementById('exitConfirmModal').classList.remove('show');
+    const success = applyPenaltyIfNeeded(() => exitToMenu());
+    if(!success) showInsufficientModalForAction();
+  };
+  document.getElementById('exitConfirmNo').onclick = () => {
+    document.getElementById('exitConfirmModal').classList.remove('show');
+    if(active && !isTimeOutMode) resumeGame();
+  };
+  document.getElementById('timeoutContinueBtn').onclick = () => { if(coins >= 5) continueWithCoins(); else { pauseGame(); const insModal = document.getElementById('insufficientCoinsModal'); insModal.classList.add('show'); const goShop = document.getElementById('insufficientCoinsGoShop'); const cancel = document.getElementById('insufficientCoinsCancel'); const closeModal = () => { insModal.classList.remove('show'); goShop.removeEventListener('click', goHandler); cancel.removeEventListener('click', cancelHandler); if(isTimeOutMode && !active) showTimeoutModal(); }; const goHandler = () => { closeModal(); document.getElementById('shopModal').classList.add('show'); }; const cancelHandler = () => { closeModal(); if(isTimeOutMode && !active) showTimeoutModal(); }; goShop.addEventListener('click', goHandler); cancel.addEventListener('click', cancelHandler); } };
+  document.getElementById('timeoutUseBoostBtn').onclick = () => useTimeBoostFromModal();
+  document.getElementById('timeoutShopBtn').onclick = () => { document.getElementById('timeoutModal').classList.remove('show'); document.getElementById('shopModal').classList.add('show'); const checkClose = setInterval(() => { if(!document.getElementById('shopModal').classList.contains('show')){ clearInterval(checkClose); if(isTimeOutMode && !active) showTimeoutModal(); } }, 200); };
+  function showPurchaseConfirm(item, cost, name) {
+    pauseGame();
+    document.getElementById('purchaseModalText').innerHTML = `آیا مایل به خرید ${name} هستید؟`;
+    window.pendingPurchase = { item, cost };
+    document.getElementById('confirmPurchaseModal').classList.add('show');
+  }
+  document.getElementById('confirmPurchaseYes').onclick = () => {
+    document.getElementById('confirmPurchaseModal').classList.remove('show');
+    if(window.pendingPurchase){
+      const { item, cost } = window.pendingPurchase;
+      if(item === 'gold_100' || item === 'gold_200' || item === 'gold_300'){
+        document.getElementById('paymentModal').classList.add('show');
+        window.pendingGoldType = item;
+        showToast('لطفاً کد توکن را وارد کنید.', true);
+      } else {
+        if(coins >= cost){
+          coins -= cost;
+          if(item === 'time_boost'){ inventory.timeBoosts++; showToast('زمان اضافه به انبار اضافه شد.', true); }
+          else if(item === 'heart_boost'){ inventory.heartBoosts++; showToast('قلب اضافه به انبار اضافه شد.', true); }
+          save(); updateUI();
+        } else showToast('سکه کافی ندارید!', false);
+      }
+      window.pendingPurchase = null;
+    }
+    if(active && !isTimeOutMode) resumeGame();
+    saveGameState();
+  };
+  document.getElementById('confirmPurchaseNo').onclick = () => {
+    document.getElementById('confirmPurchaseModal').classList.remove('show');
+    showToast('خرید لغو شد.', false);
+    window.pendingPurchase = null;
+    if(active && !isTimeOutMode) resumeGame();
+  };
+  
+  document.querySelectorAll('.shop-buy-coin').forEach(btn => {
+    btn.onclick = () => {
+      const item = btn.dataset.item;
+      if(item === 'time_boost') showPurchaseConfirm('time_boost', 10, 'زمان اضافه (+۵ ثانیه) به قیمت ۱۰ سکه');
+      else if(item === 'heart_boost') showPurchaseConfirm('heart_boost', 5, 'قلب اضافه (۱ عدد) به قیمت ۵ سکه');
+      else if(item === 'gold_100') showPurchaseConfirm('gold_100', 0, '۱۰۰ سکه به قیمت ۵۰,۰۰۰ تومان');
+      else if(item === 'gold_200') showPurchaseConfirm('gold_200', 0, '۲۰۰ سکه به قیمت ۱۰۰,۰۰۰ تومان');
+      else if(item === 'gold_300') showPurchaseConfirm('gold_300', 0, '۳۰۰ سکه به قیمت ۱۵۰,۰۰۰ تومان');
+    };
+  });
+  
+  const tokenInput = document.getElementById('tokenInput');
+  const tokenStatus = document.getElementById('tokenStatus');
+  const tokenCheckBtn = document.getElementById('tokenCheckBtn');
+  const tokenCrossBtn = document.getElementById('tokenCrossBtn');
+
+  function clearTokenStatus() {
+    tokenStatus.textContent = '';
+    tokenStatus.className = 'token-status';
+  }
+
+  function handleTokenValidation() {
+    const token = tokenInput.value.trim();
+    const type = window.pendingGoldType;
+    if (!type) {
+      tokenStatus.textContent = '❌ ابتدا نوع خرید را انتخاب کنید.';
+      tokenStatus.className = 'token-status error';
+      return;
+    }
+    const result = validateToken(token, type);
+    if (result.valid) {
+      tokenStatus.textContent = '✅ ' + result.message;
+      tokenStatus.className = 'token-status success';
+      let addCoins = 0;
+      if (type === 'gold_100') addCoins = 100;
+      else if (type === 'gold_200') addCoins = 200;
+      else if (type === 'gold_300') addCoins = 300;
+      coins += addCoins;
+      markTokenUsed(token);
+      save();
+      updateUI();
+      showToast(`🎉 ${addCoins} سکه به حساب شما اضافه شد!`, true);
+      setTimeout(() => {
+        document.getElementById('paymentModal').classList.remove('show');
+        tokenInput.value = '';
+        clearTokenStatus();
+        window.pendingGoldType = null;
+        if(active && !isTimeOutMode) resumeGame();
+        saveGameState();
+      }, 1500);
+    } else {
+      tokenStatus.textContent = '❌ ' + result.message;
+      tokenStatus.className = 'token-status error';
+    }
+  }
+
+  tokenCheckBtn.addEventListener('click', handleTokenValidation);
+  tokenCrossBtn.addEventListener('click', () => {
+    tokenInput.value = '';
+    clearTokenStatus();
+    showToast('ورود توکن لغو شد.', false);
+  });
+
+  tokenInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTokenValidation();
+    }
+  });
+
+  document.getElementById('closePaymentBtn').onclick = () => {
+    document.getElementById('paymentModal').classList.remove('show');
+    tokenInput.value = '';
+    clearTokenStatus();
+    window.pendingGoldType = null;
+    if(active && !isTimeOutMode) resumeGame();
+    saveGameState();
+  };
+  document.getElementById('paymentModal').addEventListener('click', function(e) {
+    if(e.target === this) {
+      this.classList.remove('show');
+      tokenInput.value = '';
+      clearTokenStatus();
+      window.pendingGoldType = null;
+      if(active && !isTimeOutMode) resumeGame();
+      saveGameState();
+    }
+  });
+  
+  document.getElementById('useTimeBoostBtn').onclick = useTimeBoostManual;
+  document.getElementById('useHeartBoostBtn').onclick = useHeartBoostManual;
+  const shopModal = document.getElementById('shopModal');
+  let wasActive = false;
+  shopModal.addEventListener('show', () => { if(active && !isTimeOutMode){ wasActive = true; pauseGame(); } });
+  shopModal.addEventListener('close', () => { if(wasActive && active && !isTimeOutMode) resumeGame(); wasActive = false; });
+  document.getElementById('closeShopBtn').onclick = () => { shopModal.classList.remove('show'); if(wasActive && active && !isTimeOutMode) resumeGame(); wasActive = false; };
+  const infoModalElem = document.getElementById('infoModal');
+  infoModalElem.addEventListener('show', () => { if(active && !isTimeOutMode) pauseGame(); });
+  infoModalElem.addEventListener('close', () => { if(active && !isTimeOutMode) resumeGame(); });
+  document.getElementById('closeInfoBtn').onclick = () => { infoModalElem.classList.remove('show'); if(active && !isTimeOutMode) resumeGame(); };
+  
+  // ---------- مدیریت شروع بازی (از منو) ----------
+  let savedGameExists = false;
+
+  document.getElementById('startGameBtn').onclick = () => {
+    mainMenu.style.display = 'none';
+    gameContainer.classList.add('active');
+    if (savedGameExists) {
+      restoreGame();
+      updateUI();
+      updateInventoryDisplay();
+    } else {
+      let diff = parseInt(document.querySelector('.diff-btn.active').dataset.size);
+      startGame(diff, false, true);
+    }
+  };
+
+  document.getElementById('shopMenuBtn').onclick = () => shopModal.classList.add('show');
+  document.getElementById('infoMenuBtn').onclick = () => infoModalElem.classList.add('show');
+  document.getElementById('replayBtn').onclick = () => { winOverlay.classList.remove('show'); let diff = parseInt(document.querySelector('.diff-btn.active').dataset.size); startGame(diff, true, false); };
+  document.getElementById('newGameBtn').onclick = () => { winOverlay.classList.remove('show'); let diff = parseInt(document.querySelector('.diff-btn.active').dataset.size); startGame(diff, false, true); };
+  function showToast(msg, isSuccess=true){
+    const notif = document.getElementById('purchaseNotification');
+    const iconSpan = document.getElementById('notificationIcon');
+    const textSpan = document.getElementById('notificationText');
+    iconSpan.innerHTML = isSuccess ? `<svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>` : `<svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+    textSpan.innerText = msg;
+    notif.classList.add('show');
+    setTimeout(() => notif.classList.remove('show'), 2500);
+  }
+
+  // ---------- بارگذاری اولیه ----------
+  let percent = 0;
+  function runFakeLoading(){
+    return new Promise(resolve => {
+      let interval = setInterval(() => {
+        percent += 5;
+        if(percent >= 100){ percent = 100; clearInterval(interval); resolve(); }
+        document.getElementById('loadingBar').style.width = percent + '%';
+        document.getElementById('loadingText').innerText = `بارگذاری... ${percent}%`;
+      }, 300);
+    });
+  }
+
+  runFakeLoading().then(() => {
+    document.getElementById('loadingScreen').classList.add('fade-out');
+    setTimeout(() => {
+      document.getElementById('loadingScreen').style.display = 'none';
+      mainMenu.style.display = 'block';
+      const saved = loadGameState();
+      if (saved && cards.length > 0) {
+        savedGameExists = true;
+        updateUI();
+        updateInventoryDisplay();
+      } else {
+        savedGameExists = false;
+        updateUI();
+      }
+    }, 400);
+  });
+
+  // ---------- مدیریت شبکه ----------
+  const networkOverlay = document.getElementById('networkErrorOverlay');
+  let wasGameActiveBeforeOffline = false;
+
+  function showNetworkError() {
+    if (active) {
+      wasGameActiveBeforeOffline = true;
+      pauseGame();
+    } else {
+      wasGameActiveBeforeOffline = false;
+    }
+    networkOverlay.classList.add('show');
+    saveGameState();
+  }
+
+  function hideNetworkError() {
+    networkOverlay.classList.remove('show');
+    if (wasGameActiveBeforeOffline && active) {
+      resumeGame();
+    }
+    wasGameActiveBeforeOffline = false;
+  }
+
+  if (!navigator.onLine) {
+    showNetworkError();
+  }
+
+  window.addEventListener('offline', () => {
+    showNetworkError();
+  });
+
+  window.addEventListener('online', () => {
+    hideNetworkError();
+  });
+
+  document.getElementById('networkRetryBtn').addEventListener('click', () => {
+    if (navigator.onLine) {
+      hideNetworkError();
+    } else {
+      const btn = document.getElementById('networkRetryBtn');
+      btn.textContent = '⏳ ...Checking';
+      setTimeout(() => {
+        if (!navigator.onLine) {
+          btn.textContent = 'Retry';
+          showToast('.No Connection Yet', false);
+        } else {
+          btn.textContent = 'Retry';
+          hideNetworkError();
+        }
+      }, 800);
+    }
+  });
+
+})();
+</script>
+<script>
+  (function(){
+    const swCode = `
+      const CACHE_NAME = 'memory-game-v1';
+      const urlsToCache = ['./', './index.html'];
+      self.addEventListener('install', event => {
+        event.waitUntil(
+          caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+            .then(() => self.skipWaiting())
+        );
+      });
+      self.addEventListener('activate', event => {
+        event.waitUntil(
+          caches.keys().then(cacheNames => {
+            return Promise.all(
+              cacheNames.map(cacheName => {
+                if (cacheName !== CACHE_NAME) return caches.delete(cacheName);
+              })
+            );
+          }).then(() => self.clients.claim())
+        );
+      });
+      self.addEventListener('fetch', event => {
+        event.respondWith(
+          caches.match(event.request).then(response => {
+            const fetchPromise = fetch(event.request).then(networkResponse => {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, networkResponse.clone());
+              });
+              return networkResponse;
+            }).catch(() => response);
+            return response || fetchPromise;
+          })
+        );
+      });
+      self.addEventListener('message', event => {
+        if (event.data.action === 'skipWaiting') self.skipWaiting();
+      });
+    `;
+
+    if ('serviceWorker' in navigator) {
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl)
+        .then(reg => {
+          console.log('Service Worker ثبت شد (Inline).');
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (confirm('نسخه جدید برنامه موجود است. برای بارگذاری آن، روی OK کلیک کنید.')) {
+                  newWorker.postMessage({ action: 'skipWaiting' });
+                }
+              }
+            });
+          });
+        })
+        .catch(err => console.log('خطا در ثبت Service Worker', err));
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    }
+  })();
+</script>
+</body>
+  </html>
